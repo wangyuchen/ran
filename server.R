@@ -7,16 +7,31 @@
 
 library(shiny)
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   
-  output$text <- renderText({
+#   output$text <- renderText({
+#     if(input$submit == 0) return()
+#     
+#     res <- DHR(isolate(c(input$type, input$gender, input$age, input$site)), 
+#                enroll, cov.type, max.imb, biased.p)
+#     enroll <<- res[[2]]
+#     write.csv(enroll, "log.csv", row.names=FALSE)
+#     paste("Group assigned to this patient:", "Group", res[[1]])
+#   })
+  
+  output$dt <- renderDataTable(options = list(bFilter = FALSE), {
     if(input$submit == 0) return()
     
     res <- DHR(isolate(c(input$type, input$gender, input$age, input$site)), 
                enroll, cov.type, max.imb, biased.p)
     enroll <<- res[[2]]
-    write.csv(enroll, "log.csv", row.names=FALSE)
-    paste("Group assigned to this patient:", "Group", res[[1]])
+    id.list <<- c(id.list, isolate(input$id))
+    
+    hist <- cbind(id.list, enroll)
+    names(hist) <- c("Patient #", "Surgery Type", "Gender", "Age", 
+                       "Treatment Site", "Group")
+    write.csv(hist, "log.csv", row.names=FALSE)
+    return(hist)
   })
   
   
@@ -40,6 +55,7 @@ cov.type <- c("factor", "factor", "numeric", "factor")
 max.imb <- c(3, 4, 3, 2, 10)
 biased.p <- c(0.8, 0.2)
 enroll <- NULL
+id.list <- NULL
 
 #### DHR() - DHR algorithm, 2 arms, 1:1 (1 = ctrl, 2 = act)
 #    new.subj = vector of characteristics of the new subject coming in 

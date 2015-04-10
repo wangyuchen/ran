@@ -46,6 +46,8 @@ shinyUI(pageWithSidebar(
   
   # Show a plot of the generated distribution
   mainPanel(
-    h4(textOutput("text"))
+    dataTableOutput("dt")
+    
+#     h4(textOutput("text"))
   )
 ))
